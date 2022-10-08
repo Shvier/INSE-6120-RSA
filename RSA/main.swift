@@ -11,9 +11,9 @@ extension Int {
     func isPrime() -> Bool {
         if self == 2 { return true }
         guard self > 1 && self % 2 != 0 else { return false }
-        let maxDivider = Int(sqrt(Double(self)))
-        return !stride(from: 3, through: maxDivider, by: 2).contains { divider in
-            return self % divider == 0
+        let maxDivisor = Int(sqrt(Double(self)))
+        return !stride(from: 3, through: maxDivisor, by: 2).contains { divisor in
+            return self % divisor == 0
         }
     }
 }
