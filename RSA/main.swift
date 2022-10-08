@@ -19,11 +19,6 @@ extension Int {
 }
 
 class RSAResolver {
-    let p: Int
-    let q: Int
-    let N: Int
-    let e: Int
-    
     private class func generatePrimeNumber() -> Int {
         let lower: Int = 2 << 14
         let upper: Int = 2 << 15
@@ -36,16 +31,40 @@ class RSAResolver {
     }
     
     private class func gcd(_ left: Int, _ right: Int) -> Int {
-        var m = max(left, right)
-        var n = min(left, right)
-        var remain = n
-        while remain != 0 {
-            remain = m % n
-            m = n
-            n = remain
+        var dividend = max(left, right)
+        var divisor = min(left, right)
+        var remainder = divisor
+        while remainder != 0 {
+            remainder = dividend % divisor
+            dividend = divisor
+            divisor = remainder
         }
-        return m
+        return dividend
     }
+    
+    private class func findMultiInverse(_ e: Int, _ phi: Int) -> Int {
+        var dividend = max(e, phi)
+        var divisor = min(e, phi)
+        var x1 = 1
+        var x2 = 0
+        while divisor != 1 {
+            let quotient = dividend / divisor
+            let remainder = dividend - quotient * divisor
+            let x = x2 - quotient * x1
+            dividend = divisor
+            divisor = remainder
+            x2 = x1
+            x1 = x
+        }
+        return x1 >= 0 ? x1 : x1 + phi
+    }
+    
+    private let p: Int
+    private let q: Int
+    private let d: Int
+
+    let N: Int
+    let e: Int
     
     init() {
         let p = RSAResolver.generatePrimeNumber()
@@ -61,10 +80,13 @@ class RSAResolver {
         while RSAResolver.gcd(phi, e) != 1 {
             e = e + 2
         }
-        assert(e < phi, "failed to find e")
+        assert(e < phi, "Failed to find e")
         self.e = e
+        let d = RSAResolver.findMultiInverse(e, phi)
+        self.d = d
+        print("p: \(self.p), q: \(self.q), d: \(self.d)")
     }
 }
 
 let resolver = RSAResolver()
-print(resolver.p, resolver.q, resolver.N, resolver.e)
+print("(e, N): (\(resolver.e), \(resolver.N))")
