@@ -68,10 +68,14 @@ def mod(base, exponent, modulo):
         result = result * remainders[i] % modulo
     return result
 
-def toDecimal(str):
+def convertStrToDecimal(str):
     s = str.encode('utf-8')
     n = int(s.hex(), 16)
     return n
+
+def convertDecimaltoStr(n):
+    hexMsg = f'{n:x}'
+    return bytearray.fromhex(hexMsg).decode()
 
 class RSAResolver:
     N = 0
@@ -103,16 +107,36 @@ class RSAResolver:
         self.N = N
         self.e = e
         self.d = d
-        print(p, q, N, e, d)
+        print(f'p: {p}, q: {q}')
+        print(f'(e, N): ({e}, {N})')
+        print(f'(e, d): ({e}, {d})')
+
+    @classmethod
+    def fromMetadata(self, N, e, d):
+        self.N = N
+        self.e = e
+        self.d = d
     
     def encrypt(self, msg, chunkSize = 3):
         splittedMsg = [msg[i:i+chunkSize] for i in range(0, len(msg), chunkSize)]
-        decimalMsg = list(map(toDecimal, splittedMsg))
+        decimalMsg = list(map(convertStrToDecimal, splittedMsg))
         result = []
         for m in decimalMsg:
             cipher = mod(m, self.e, self.N)
             result.append(cipher)
         return result
 
+    def decrypt(self, cipher):
+        decimalMsg = []
+        for c in cipher:
+            msg = mod(c, self.d, self.N)
+            decimalMsg.append(msg)
+        msgList = list(map(convertDecimaltoStr, decimalMsg))
+        return ''.join(msgList)
+            
+msg = "Sometimes you have to lose yourself before you find anything."
 rsa = RSAResolver()
-rsa.encrypt("Hello World")
+cipher = rsa.encrypt(msg)
+print(cipher)
+plaintext = rsa.decrypt(cipher)
+print(plaintext)
