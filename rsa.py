@@ -81,19 +81,11 @@ class RSAResolver:
     N = 0
     e = 0
 
-    @property
-    def attr(self):
-        return self._d
-    
-    @attr.setter
-    def attr(self, value):
-        self._d = value
-    
-    @attr.deleter
-    def attr(self):
-        del self._d
-
-    def __init__(self):
+    def __init__(self, N = -1, e = -1):
+        if N > 0 and e > 0:
+            self.N = N
+            self.e = e
+            return
         p = generatePrimeNumber()
         q = generatePrimeNumber()
         while p == q:
@@ -106,16 +98,9 @@ class RSAResolver:
         d = findMultiInverse(e, phi)
         self.N = N
         self.e = e
-        self.d = d
         print(f'p: {p}, q: {q}')
         print(f'(e, N): ({e}, {N})')
         print(f'(e, d): ({e}, {d})')
-
-    @classmethod
-    def fromMetadata(self, N, e, d):
-        self.N = N
-        self.e = e
-        self.d = d
     
     def encrypt(self, msg, chunkSize = 3):
         splittedMsg = [msg[i:i+chunkSize] for i in range(0, len(msg), chunkSize)]
@@ -126,17 +111,20 @@ class RSAResolver:
             result.append(cipher)
         return result
 
-    def decrypt(self, cipher):
+    def decrypt(self, cipher, d):
         decimalMsg = []
         for c in cipher:
-            msg = mod(c, self.d, self.N)
+            msg = mod(c, d, self.N)
             decimalMsg.append(msg)
         msgList = list(map(convertDecimaltoStr, decimalMsg))
         return ''.join(msgList)
             
 msg = "Sometimes you have to lose yourself before you find anything."
-rsa = RSAResolver()
+N = 3051208997
+e = 65537
+d = 944515073
+rsa = RSAResolver(N, e)
 cipher = rsa.encrypt(msg)
 print(cipher)
-plaintext = rsa.decrypt(cipher)
+plaintext = rsa.decrypt(cipher, d)
 print(plaintext)
