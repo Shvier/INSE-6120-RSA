@@ -7,8 +7,6 @@ class ElGamal:
     def newPair(self):
         p = num_theory.generatePrimeNumber()
         g = randint(2 << 14, p)
-        while num_theory.gcd(g, p) != 1:
-            g = randint(2 << 14, p)
         x = randint(2 << 14, p)
         y = num_theory.mod(g, x, p)
         print(f'Public Key is: (y: {y}, g: {g}, p: {p})')
